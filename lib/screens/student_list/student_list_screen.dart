@@ -189,13 +189,24 @@ class _StudentListScreenState extends State<StudentListScreen>
                               final student = filteredStudents[index];
                               return StudentCard(
                                 student: student,
-                                onTap: () {
-                                  Navigator.push(
+                                onTap: () async {
+                                  final deleted = await Navigator.push<bool>(
                                     context,
                                     AnimationHelper.createSlideTransition(
                                       StudentDetailScreen(student: student),
                                     ),
                                   );
+
+                                  if (deleted == true && mounted) {
+                                    setState(() {
+                                      _query = '';
+                                      _classFilter = '';
+                                      _deptFilter = '';
+                                      _gpaFilter = null;
+                                      _searchController.clear();
+                                    });
+                                    await context.read<StudentProvider>().fetchStudents();
+                                  }
                                 },
                               );
                             },
