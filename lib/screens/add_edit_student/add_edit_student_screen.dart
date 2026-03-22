@@ -80,22 +80,12 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
   }
 
   Future<void> _pickImage() async {
-    // Request permission only on mobile platforms
     if (!kIsWeb) {
       final status = await Permission.photos.request();
-      
       if (status.isDenied) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Quyền truy cập thư viện bị từ chối')),
-        );
-        return;
-      }
-      
-      if (status.isPermanentlyDenied) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Vui lòng cấp quyền trong cài đặt ứng dụng')),
         );
         return;
       }
@@ -104,21 +94,18 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      // Load bytes for web compatibility
       final bytes = await pickedFile.readAsBytes();
       setState(() {
         _selectedImage = pickedFile;
         _imageBytes = bytes;
-        _avatarUrl = ''; // Clear URL when new image is selected
+        _avatarUrl = '';
       });
     }
   }
 
-  // Check if student ID already exists
   bool _studentIdExists(String studentId) {
     final provider = context.read<StudentProvider>();
     return provider.students.any((student) {
-      // If editing, exclude current student
       if (widget.student != null && student.id == widget.student!.id) {
         return false;
       }
@@ -130,6 +117,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     showDialog(
       context: context,
       builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -138,24 +126,31 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
               const Text('Ảnh đại diện', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               if (_imageBytes != null)
-                Image.memory(_imageBytes!, height: 300, width: 300, fit: BoxFit.cover)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(_imageBytes!, height: 300, width: 300, fit: BoxFit.cover),
+                )
               else if (_avatarUrl.isNotEmpty)
-                Image.network(_avatarUrl, height: 300, width: 300, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => Container(
-                  height: 300,
-                  width: 300,
-                  color: Colors.grey.shade300,
-                  child: const Icon(Icons.broken_image),
-                ))
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(_avatarUrl, height: 300, width: 300, fit: BoxFit.cover),
+                )
               else
                 Container(
                   height: 300,
                   width: 300,
-                  color: Colors.grey.shade300,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: const Icon(Icons.image_not_supported, size: 50),
                 ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
                 child: const Text('Đóng'),
               ),
             ],
@@ -171,6 +166,14 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
       initialDate: _dateOfBirth ?? DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(primary: Colors.blue.shade700),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null && picked != _dateOfBirth) {
       setState(() {
@@ -183,6 +186,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     showDialog(
       context: context,
       builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -194,21 +198,19 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 decoration: InputDecoration(
                   hintText: 'Tìm kiếm...',
                   prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                onChanged: (value) {
-                  // Filter logic if needed
-                },
               ),
               const SizedBox(height: 12),
-              Expanded(
+              SizedBox(
+                height: 300,
                 child: ListView(
                   shrinkWrap: true,
                   children: AppConstants.classes
                       .map((cls) => ListTile(
                             title: Text(cls),
                             selected: _classController.text == cls,
-                            selectedTileColor: Colors.blue.shade100,
+                            selectedTileColor: Colors.blue.shade50,
                             onTap: () {
                               setState(() {
                                 _classController.text = cls;
@@ -230,6 +232,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
     showDialog(
       context: context,
       builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -241,21 +244,19 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                 decoration: InputDecoration(
                   hintText: 'Tìm kiếm...',
                   prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                onChanged: (value) {
-                  // Filter logic if needed
-                },
               ),
               const SizedBox(height: 12),
-              Expanded(
+              SizedBox(
+                height: 300,
                 child: ListView(
                   shrinkWrap: true,
                   children: AppConstants.departments
                       .map((dept) => ListTile(
                             title: Text(dept),
                             selected: _departmentController.text == dept,
-                            selectedTileColor: Colors.blue.shade100,
+                            selectedTileColor: Colors.blue.shade50,
                             onTap: () {
                               setState(() {
                                 _departmentController.text = dept;
@@ -275,27 +276,27 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
 
   Future<void> _saveStudent() async {
     if (_formKey.currentState!.validate()) {
+      if (_dateOfBirth == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Vui lòng chọn ngày sinh')),
+        );
+        return;
+      }
+
       final provider = context.read<StudentProvider>();
       final messenger = ScaffoldMessenger.of(context);
 
-      // Upload avatar if selected
       String avatarUrl = _avatarUrl;
       if (_selectedImage != null) {
-        messenger.showSnackBar(
-          const SnackBar(content: Text('Đang tải ảnh lên...')),
-        );
-
+        messenger.showSnackBar(const SnackBar(content: Text('Đang tải ảnh lên...')));
         final uploadedUrl = await provider.uploadAvatar(
           _selectedImage!,
           _studentIdController.text.isNotEmpty ? _studentIdController.text : 'temp',
         );
-
         if (uploadedUrl != null) {
           avatarUrl = uploadedUrl;
         } else {
-          messenger.showSnackBar(
-            const SnackBar(content: Text('Lỗi tải ảnh lên')),
-          );
+          messenger.showSnackBar(const SnackBar(content: Text('Lỗi tải ảnh lên')));
           return;
         }
       }
@@ -318,16 +319,12 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
         if (widget.student == null) {
           await provider.addStudent(student);
           if (!mounted) return;
-          messenger.showSnackBar(
-            const SnackBar(content: Text('Thêm sinh viên thành công')),
-          );
+          messenger.showSnackBar(const SnackBar(content: Text('Thêm sinh viên thành công')));
           Navigator.popUntil(context, (route) => route.isFirst);
         } else {
           await provider.updateStudent(student);
           if (!mounted) return;
-          messenger.showSnackBar(
-            const SnackBar(content: Text('Cập nhật sinh viên thành công')),
-          );
+          messenger.showSnackBar(const SnackBar(content: Text('Cập nhật sinh viên thành công')));
           Navigator.pop(context);
         }
       } catch (e) {
@@ -341,20 +338,18 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.student == null ? 'Thêm sinh viên' : 'Chỉnh sửa sinh viên',
-        ),
-        elevation: 2,
+        title: Text(widget.student == null ? 'Thêm sinh viên' : 'Chỉnh sửa sinh viên'),
+        elevation: 0,
+        backgroundColor: Colors.blue.shade700,
+        foregroundColor: Colors.white,
       ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.blue.shade50,
-              Colors.blue.shade100.withValues(alpha: 0.5),
-            ],
+            colors: [Colors.blue.shade700, Colors.blue.shade50],
+            stops: const [0.0, 0.3],
           ),
         ),
         child: Padding(
@@ -363,11 +358,8 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
             key: _formKey,
             child: ListView(
               children: [
-                // Basic Information Section
                 _buildSectionHeader(context, '📋 Thông tin cơ bản'),
-                const SizedBox(height: 12),
-
-                // Avatar Section
+                const SizedBox(height: 16),
                 Center(
                   child: Column(
                     children: [
@@ -378,34 +370,28 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                                 ? () => _showAvatarDialog(context)
                                 : null,
                             child: CircleAvatar(
-                              radius: 50,
-                              backgroundColor: Colors.blue.shade200,
-                              backgroundImage: _imageBytes != null
-                                  ? MemoryImage(_imageBytes!)
-                                  : (_avatarUrl.isNotEmpty
-                                      ? NetworkImage(_avatarUrl)
-                                      : null),
-                              child: _imageBytes == null && _avatarUrl.isEmpty
-                                  ? const Icon(
-                                      Icons.person,
-                                      size: 50,
-                                      color: Colors.white,
-                                    )
-                                  : null,
+                              radius: 55,
+                              backgroundColor: Colors.white,
+                              child: CircleAvatar(
+                                radius: 52,
+                                backgroundColor: Colors.blue.shade100,
+                                backgroundImage: _imageBytes != null
+                                    ? MemoryImage(_imageBytes!)
+                                    : (_avatarUrl.isNotEmpty ? NetworkImage(_avatarUrl) : null),
+                                child: _imageBytes == null && _avatarUrl.isEmpty
+                                    ? const Icon(Icons.person, size: 55, color: Colors.blue)
+                                    : null,
+                              ),
                             ),
                           ),
                           Positioned(
-                            bottom: 0,
-                            right: 0,
+                            bottom: 2,
+                            right: 2,
                             child: CircleAvatar(
                               radius: 18,
-                              backgroundColor: Colors.blue.shade600,
+                              backgroundColor: Colors.blue.shade800,
                               child: IconButton(
-                                icon: const Icon(
-                                  Icons.camera_alt,
-                                  size: 16,
-                                  color: Colors.white,
-                                ),
+                                icon: const Icon(Icons.camera_alt, size: 18, color: Colors.white),
                                 onPressed: _pickImage,
                               ),
                             ),
@@ -414,125 +400,60 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Ảnh đại diện (nhấn để xem chi tiết)',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey.shade600,
-                            ),
+                        'Nhấn để xem ảnh chi tiết',
+                        style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
-
-                TextFormField(
-                  controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: 'Tên sinh viên',
-                    prefixIcon: const Icon(Icons.person),
-                  ),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Vui lòng nhập tên' : null,
-                ),
+                const SizedBox(height: 24),
+                _buildTextField(_nameController, 'Tên sinh viên', Icons.person),
                 const SizedBox(height: 12),
-                TextFormField(
-                  controller: _studentIdController,
-                  decoration: InputDecoration(
-                    labelText: 'Mã sinh viên',
-                    prefixIcon: const Icon(Icons.badge),
-                  ),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Vui lòng nhập mã sinh viên';
-                    }
-                    if (_studentIdExists(value)) {
-                      return 'Mã sinh viên này đã tồn tại';
-                    }
-                    return null;
-                  },
-                ),
+                _buildTextField(_studentIdController, 'Mã sinh viên', Icons.badge, validator: (value) {
+                  if (value!.isEmpty) return 'Vui lòng nhập mã sinh viên';
+                  if (_studentIdExists(value)) return 'Mã sinh viên đã tồn tại';
+                  return null;
+                }),
                 const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
-                      child: TextFormField(
-                        controller: _classController,
-                        decoration: InputDecoration(
-                          labelText: 'Lớp',
-                          prefixIcon: const Icon(Icons.class_),
-                          hintText: 'Nhập hoặc chọn',
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.arrow_drop_down),
-                            onPressed: () => _showClassPicker(context),
-                          ),
-                        ),
-                        onChanged: (_) => setState(() {}),
-                        validator: (value) =>
-                            value!.isEmpty ? 'Vui lòng nhập lớp' : null,
-                      ),
+                      child: _buildPickerField(_classController, 'Lớp', Icons.class_, () => _showClassPicker(context)),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: TextFormField(
-                        controller: _departmentController,
-                        decoration: InputDecoration(
-                          labelText: 'Khoa',
-                          prefixIcon: const Icon(Icons.apartment),
-                          hintText: 'Nhập hoặc chọn',
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.arrow_drop_down),
-                            onPressed: () => _showDepartmentPicker(context),
-                          ),
-                        ),
-                        onChanged: (_) => setState(() {}),
-                        validator: (value) =>
-                            value!.isEmpty ? 'Vui lòng nhập khoa' : null,
-                      ),
+                      child: _buildPickerField(_departmentController, 'Khoa', Icons.apartment, () => _showDepartmentPicker(context)),
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-
-                // Academic Information Section
+                const SizedBox(height: 24),
                 _buildSectionHeader(context, '📚 Thông tin học tập'),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
-                      child: TextFormField(
-                        controller: _gpaController,
-                        decoration: InputDecoration(
-                          labelText: 'GPA',
-                          prefixIcon: const Icon(Icons.grade),
-                        ),
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value!.isEmpty) return 'Vui lòng nhập GPA';
-                          final gpa = double.tryParse(value);
-                          if (gpa == null || gpa < 0 || gpa > 4) {
-                            return 'GPA: 0-4';
-                          }
-                          return null;
-                        },
-                      ),
+                      child: _buildTextField(_gpaController, 'GPA', Icons.grade, isNumber: true, validator: (value) {
+                        if (value!.isEmpty) return 'Vui lòng nhập GPA';
+                        final gpa = double.tryParse(value);
+                        if (gpa == null || gpa < 0 || gpa > 4) return 'GPA: 0-4';
+                        return null;
+                      }),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Text(
-                              _dateOfBirth == null
-                                  ? 'Chọn ngày sinh'
-                                  : DateFormat(
-                                      'dd/MM/yyyy',
-                                    ).format(_dateOfBirth!),
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ),
-                          ElevatedButton.icon(
+                          const Text(' Ngày sinh', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 4),
+                          OutlinedButton.icon(
                             onPressed: () => _selectDate(context),
-                            icon: const Icon(Icons.calendar_today),
-                            label: const Text('Ngày'),
+                            icon: const Icon(Icons.calendar_today, size: 18),
+                            label: Text(_dateOfBirth == null ? 'Chọn ngày' : DateFormat('dd/MM/yyyy').format(_dateOfBirth!)),
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(double.infinity, 54),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
                           ),
                         ],
                       ),
@@ -540,8 +461,12 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                // Subjects multi-select
                 Card(
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: Colors.grey.shade300),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: Column(
@@ -549,42 +474,30 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.list, color: Colors.blue),
+                            const Icon(Icons.list_alt, color: Colors.blue),
                             const SizedBox(width: 8),
-                            const Text(
-                              'Danh sách môn học',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 14,
-                              ),
-                            ),
-                            if (_selectedSubjects.isNotEmpty)
-                              Chip(
-                                label: Text('${_selectedSubjects.length}'),
-                                backgroundColor: Colors.blue.shade200,
-                              ),
+                            const Text('Môn học đã chọn', style: TextStyle(fontWeight: FontWeight.bold)),
+                            const Spacer(),
+                            Text('${_selectedSubjects.length}', style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        const Divider(),
                         Wrap(
-                          spacing: 4,
-                          runSpacing: 4,
+                          spacing: 6,
+                          runSpacing: 0,
                           children: AppConstants.subjects.map((subject) {
                             final isSelected = _selectedSubjects.contains(subject);
                             return FilterChip(
-                              label: Text(subject),
+                              label: Text(subject, style: TextStyle(fontSize: 12, color: isSelected ? Colors.white : Colors.black87)),
                               selected: isSelected,
                               onSelected: (selected) {
                                 setState(() {
-                                  if (selected) {
-                                    _selectedSubjects.add(subject);
-                                  } else {
-                                    _selectedSubjects.remove(subject);
-                                  }
+                                  selected ? _selectedSubjects.add(subject) : _selectedSubjects.remove(subject);
                                 });
                               },
-                              backgroundColor: Colors.grey.shade200,
-                              selectedColor: Colors.blue.shade200,
+                              selectedColor: Colors.blue.shade600,
+                              checkmarkColor: Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             );
                           }).toList(),
                         ),
@@ -592,59 +505,42 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-
-                // Contact Information Section
+                const SizedBox(height: 24),
                 _buildSectionHeader(context, '📞 Thông tin liên hệ'),
+                const SizedBox(height: 16),
+                _buildTextField(_emailController, 'Email', Icons.email, isEmail: true),
                 const SizedBox(height: 12),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: const Icon(Icons.email),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value!.isEmpty) return 'Vui lòng nhập email';
-                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                      return 'Email không hợp lệ';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _phoneController,
-                  decoration: InputDecoration(
-                    labelText: 'Số điện thoại',
-                    prefixIcon: const Icon(Icons.phone),
-                  ),
-                  keyboardType: TextInputType.phone,
-                  validator: (value) =>
-                      value!.isEmpty ? 'Vui lòng nhập số điện thoại' : null,
-                ),
-                const SizedBox(height: 28),
-
-                // Action Buttons
+                _buildTextField(_phoneController, 'Số điện thoại', Icons.phone, isPhone: true),
+                const SizedBox(height: 32),
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton.icon(
+                      child: OutlinedButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close),
-                        label: const Text('Hủy'),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(0, 50),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text('Hủy'),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 16),
                     Expanded(
-                      child: ElevatedButton.icon(
+                      child: ElevatedButton(
                         onPressed: () => _saveStudent(),
-                        icon: const Icon(Icons.save),
-                        label: const Text('Lưu'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade700,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(0, 50),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 2,
+                        ),
+                        child: const Text('Lưu thông tin', style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -655,19 +551,52 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen> {
 
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.blue.shade600,
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.blue.shade800,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))],
       ),
       child: Text(
         title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-        ),
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
       ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label, IconData icon, {bool isNumber = false, bool isEmail = false, bool isPhone = false, String? Function(String?)? validator}) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: isNumber ? TextInputType.number : (isEmail ? TextInputType.emailAddress : (isPhone ? TextInputType.phone : TextInputType.text)),
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, size: 22),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.8),
+      ),
+      validator: validator ?? (value) {
+        if (value == null || value.isEmpty) return 'Không được để trống';
+        if (isEmail && !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) return 'Email không hợp lệ';
+        return null;
+      },
+    );
+  }
+
+  Widget _buildPickerField(TextEditingController controller, String label, IconData icon, VoidCallback onTap) {
+    return TextFormField(
+      controller: controller,
+      readOnly: true,
+      onTap: onTap,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, size: 22),
+        suffixIcon: const Icon(Icons.arrow_drop_down),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.8),
+      ),
+      validator: (value) => value == null || value.isEmpty ? 'Chọn $label' : null,
     );
   }
 }
