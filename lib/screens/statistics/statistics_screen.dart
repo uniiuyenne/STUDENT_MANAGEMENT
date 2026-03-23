@@ -69,7 +69,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
             end: Alignment.bottomCenter,
             colors: [
               Colors.purple.shade50,
-              Colors.blue.shade100.withValues(alpha: 0.5),
+              Colors.blue.shade100.withOpacity(0.5),
             ],
           ),
         ),
@@ -488,11 +488,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           gradient: LinearGradient(
-<<<<<<< HEAD
-            colors: [color.withValues(alpha: 0.5), color.withValues(alpha: 0.2)],
-=======
             colors: [color.withOpacity(0.5), color.withOpacity(0.2)],
->>>>>>> 22c0b21 (statistics screen)
           ),
         ),
         padding: const EdgeInsets.all(16),

@@ -44,7 +44,7 @@ class SupabaseService {
         return publicUrl;
       }
     } catch (e) {
-      // print('Error uploading avatar: $e');
+      print('Error uploading avatar: $e');
     }
     return null;
   }
@@ -62,7 +62,7 @@ class SupabaseService {
 
       return true;
     } catch (e) {
-      // print('Error deleting avatar: $e');
+      print('Error deleting avatar: $e');
       return false;
     }
   }

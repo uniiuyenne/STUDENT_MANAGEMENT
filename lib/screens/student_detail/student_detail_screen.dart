@@ -52,7 +52,7 @@ class StudentDetailScreen extends StatelessWidget {
             end: Alignment.bottomCenter,
             colors: [
               Colors.blue.shade50,
-              Colors.blue.shade100.withValues(alpha: 0.5),
+              Colors.blue.shade100.withOpacity(0.5),
             ],
           ),
         ),
@@ -75,7 +75,7 @@ class StudentDetailScreen extends StatelessWidget {
                       onTap: student.avatarUrl.isNotEmpty ? () => _showAvatarDialog(context) : null,
                       child: CircleAvatar(
                         radius: 36,
-                        backgroundColor: Colors.white.withValues(alpha: 0.9),
+                        backgroundColor: Colors.white.withOpacity(0.9),
                         backgroundImage: student.avatarUrl.isNotEmpty
                             ? NetworkImage(student.avatarUrl)
                             : null,
@@ -116,7 +116,7 @@ class StudentDetailScreen extends StatelessWidget {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.3),
+                              color: Colors.white.withOpacity(0.3),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -357,7 +357,7 @@ class StudentDetailScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [gpaColor.withValues(alpha: 0.8), gpaColor]),
+        gradient: LinearGradient(colors: [gpaColor.withOpacity(0.8), gpaColor]),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
